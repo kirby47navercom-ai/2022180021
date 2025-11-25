@@ -223,46 +223,29 @@ glm::vec3 modelPos = glm::vec3(0.0f, 0.0f, 0.0f);  // 도형 위치 (X, Y, Z 이동량)
 float modelRotY = 0.0f;  // Y축 회전 각도 (라디안)
 float modelRotX = 0.0f;  // X축 회전 각도 (라디안)
 
-int shape_check = 0;
+
 
 bool silver = false;
 bool solid = false;
 
 glm::vec3 camera_move = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);  // 카메라가 바라보는 목표점
-float w1 = 0.0f;
-float w2 = 0.0f;
-int w = 15;
 
-
-glm::vec3 center1;
-glm::vec3 center2;
-glm::vec3 center3;
-glm::vec3 center4;
-
-
-float rotate_count = 0.0f;
-
-int scale_time = 0;
-
-int move_num = 0;
-
-glm::vec3 center = { 0.0f,0.0f,0.0f };
-glm::vec3 rotate1 = glm::vec3(0, 0.707f, -0.707f);
-glm::vec3 rotate2 = glm::vec3(0, 1.0f, 0.0f);
-glm::vec3 rotate3 = glm::vec3(0, 0.707f, 0.707f);
-
-float _z = 0.0f;
-int z_mode = 0;
 
 //커비
 void InitData() {
+	//예시임 시험칠때 지우삼
 	shape.clear();
-	for (size_t i = 0; i < 8; ++i) {
-		shape.push_back(Shape(model[0], i));// Shape 생성 시 model 정보 전달
+	shape.push_back(Shape(model[0], 0));
+	shape.back().t.x = -2.0f;
+	shape.push_back(Shape(model[1], 1));
+	shape.back().t.x = -2.0f;
 
-	}
 
+	shape.push_back(Shape(model[2], 2));
+	shape.back().t.x = 2.0f;
+	shape.push_back(Shape(model.back(), model.size() - 1));
+	shape.back().t.x = 2.0f;
 }
 void Update() {
 	vector<GLfloat> vertexData;
@@ -318,6 +301,7 @@ int main(int argc, char** argv) {
 	model.push_back(read_obj_file("pyramid - right.obj"));
 	model.push_back(read_obj_file("pyramid - back.obj"));
 	model.push_back(read_obj_file("pyramid - bottom.obj"));
+	model.push_back(read_obj_file("cone.obj"));
 
 
 
@@ -463,12 +447,13 @@ void DrawScene() {
 
 	GLuint offset = 0;
 	for (int i = 0; i < shape.size(); ++i) {
+		size_t vertices_per_block = model[shape[i].shape_num].face_count * 3;
 		for (int j = 0; j < shape[i].vertexData.size() / 9; ++j) { // colors 개수 == face 개수
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(shape[i].modelMat));
 			glUniform3f(faceColorLoc, shape[i].colors[0], shape[i].colors[1], shape[i].colors[2]);
-			glDrawArrays(GL_TRIANGLES, offset, 3);
-			offset += 3;
+			glDrawArrays(GL_TRIANGLES, offset, vertices_per_block);
 		}
+		offset += vertices_per_block;
 	}
 
 	//--------------------------------------------------------------------------
@@ -581,10 +566,19 @@ void SpecialKeyboard(int key, int x, int y)
 
 void TimerFunction(int value)
 {
-
 	for (size_t i = 0; i < shape.size(); ++i) {
+		glm::mat4 m = glm::mat4(1.0f);
 
+		m = glm::translate(m, shape[i].t);
+		m = glm::rotate(m, glm::radians(shape[i].r.x), glm::vec3(1.0f, 0.0f, 0.0f));
+		m = glm::rotate(m, glm::radians(shape[i].r.y), glm::vec3(0.0f, 1.0f, 0.0f));
+		m = glm::rotate(m, glm::radians(shape[i].r.z), glm::vec3(0.0f, 0.0f, 1.0f));
+		m = glm::translate(m, -shape[i].t);
 
+		m = glm::translate(m, shape[i].t);
+		m = glm::rotate(m, glm::radians(shape[i].angle), glm::vec3(0.0f, 1.0f, 0.0f));
+		m = glm::scale(m, shape[i].s);
+		shape[i].modelMat = m;
 	}
 
 

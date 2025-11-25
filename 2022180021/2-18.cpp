@@ -56,6 +56,7 @@ public:
 	glm::vec3 t = { 0.0f,0.0f,0.0f };
 	glm::vec3 s = { 1.0f,1.0f,1.0f };
 	glm::vec3 r = { 0.0f,0.0f,0.0f };
+	glm::vec3 ws = { 1.0f,1.0f,1.0f };
 	glm::vec3 colors;
 	glm::mat4 modelMat = glm::mat4(1.0f);
 	glm::vec3 orimodelMat = glm::vec3(0.0f);
@@ -223,46 +224,36 @@ glm::vec3 modelPos = glm::vec3(0.0f, 0.0f, 0.0f);  // 도형 위치 (X, Y, Z 이동량)
 float modelRotY = 0.0f;  // Y축 회전 각도 (라디안)
 float modelRotX = 0.0f;  // X축 회전 각도 (라디안)
 
-int shape_check = 0;
 
 bool silver = false;
 bool solid = false;
 
 glm::vec3 camera_move = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);  // 카메라가 바라보는 목표점
-float w1 = 0.0f;
-float w2 = 0.0f;
-int w = 15;
 
 
-glm::vec3 center1;
-glm::vec3 center2;
-glm::vec3 center3;
-glm::vec3 center4;
-
-
-float rotate_count = 0.0f;
-
-int scale_time = 0;
-
-int move_num = 0;
-
-glm::vec3 center = { 0.0f,0.0f,0.0f };
-glm::vec3 rotate1 = glm::vec3(0, 0.707f, -0.707f);
-glm::vec3 rotate2 = glm::vec3(0, 1.0f, 0.0f);
-glm::vec3 rotate3 = glm::vec3(0, 0.707f, 0.707f);
-
-float _z = 0.0f;
-int z_mode = 0;
 
 //커비
 void InitData() {
 	shape.clear();
-	for (size_t i = 0; i < 8; ++i) {
-		shape.push_back(Shape(model[0], i));// Shape 생성 시 model 정보 전달
+	shape.push_back(Shape(model[0], 0));
+	shape.back().r.x = 30.0f;
+	shape.back().r.y = 30.0f;
+	shape.back().t.x = -2.0f;
+	shape.push_back(Shape(model[1], 1));
+	shape.back().r.x = 30.0f;
+	shape.back().r.y = 30.0f;
+	shape.back().t.x = -2.0f;
 
-	}
 
+	shape.push_back(Shape(model[2], 2));
+	shape.back().r.x = 30.0f;
+	shape.back().r.y = 30.0f;
+	shape.back().t.x = 2.0f;
+	shape.push_back(Shape(model.back(), model.size() - 1));
+	shape.back().r.x = 30.0f;
+	shape.back().r.y = 30.0f;
+	shape.back().t.x = 2.0f;
 }
 void Update() {
 	vector<GLfloat> vertexData;
@@ -318,6 +309,7 @@ int main(int argc, char** argv) {
 	model.push_back(read_obj_file("pyramid - right.obj"));
 	model.push_back(read_obj_file("pyramid - back.obj"));
 	model.push_back(read_obj_file("pyramid - bottom.obj"));
+	model.push_back(read_obj_file("cone.obj"));
 
 
 
@@ -420,6 +412,16 @@ void InitBuffers() {
 	glBindVertexArray(0);
 }
 
+
+
+bool c = false;
+bool v = false;
+bool t = false;
+bool u = false;
+int shape_check = 0;
+
+
+
 void DrawScene() {
 
 	glEnable(GL_DEPTH_TEST); // 깊이 테스트 활성화
@@ -463,13 +465,17 @@ void DrawScene() {
 
 	GLuint offset = 0;
 	for (int i = 0; i < shape.size(); ++i) {
-		for (int j = 0; j < shape[i].vertexData.size() / 9; ++j) { // colors 개수 == face 개수
+		size_t vertices_per_block = model[shape[i].shape_num].face_count * 3;
+		if((!c&&(i==0||i==2))|| (c && (i == 1 || i == 3)))
+		for (int j = 0; j < shape[i].vertexData.size() / 9; ++j) { 
+			
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(shape[i].modelMat));
 			glUniform3f(faceColorLoc, shape[i].colors[0], shape[i].colors[1], shape[i].colors[2]);
-			glDrawArrays(GL_TRIANGLES, offset, 3);
-			offset += 3;
+			glDrawArrays(GL_TRIANGLES, offset, vertices_per_block);
 		}
+		offset += vertices_per_block;
 	}
+
 
 	//--------------------------------------------------------------------------
 	// Camera (View) 및 Projection 매트릭스 설정
@@ -542,15 +548,202 @@ void Mouse(int button, int state, int x, int y) {
 	}
 }
 
+glm::vec3 v1;
+glm::vec3 v2;
+glm::vec3 v3;
+glm::vec3 v4;
+bool b = false;
+float vt = 0.0f;
+
 void Keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-	
+	case'1':
+		shape_check = 1;
+		break;
+	case'2':
+		shape_check = 2;
+		break;
+	case'3':
+		shape_check = 3;
+		break;
+	case 'c':
+		c = !c;
+		break;
 	case 'q':
 		exit(0);
 		break;
+	case 'x':
+		if (shape_check == 1|| shape_check == 3) {
+			shape[0].r.x += 1.0f;
+			shape[1].r.x += 1.0f;
+
+		}
+		if (shape_check == 2 || shape_check == 3) {
+			shape[2].r.x += 1.0f;
+			shape[3].r.x += 1.0f;
+		}
+		break;
+	case 'X':
+		if (shape_check == 1 || shape_check == 3) {
+			shape[0].r.x -= 1.0f;
+			shape[1].r.x -= 1.0f;
+
+		}
+		if (shape_check == 2 || shape_check == 3) {
+			shape[2].r.x -= 1.0f;
+			shape[3].r.x -= 1.0f;
+		}
+		break;
+	case 'y':
+		if (shape_check == 1 || shape_check == 3) {
+			shape[0].r.y += 1.0f;
+			shape[1].r.y += 1.0f;
+
+		}
+		if (shape_check == 2 || shape_check == 3) {
+			shape[2].r.y += 1.0f;
+			shape[3].r.y += 1.0f;
+		}
+		break;
+	case 'Y':
+		if (shape_check == 1 || shape_check == 3) {
+			shape[0].r.y -= 1.0f;
+			shape[1].r.y -= 1.0f;
+
+		}
+		if (shape_check == 2 || shape_check == 3) {
+			shape[2].r.y -= 1.0f;
+			shape[3].r.y -= 1.0f;
+		}
+		break;
+	case 'r':
+		if (shape_check == 1 || shape_check == 3) {
+			shape[0].angle += 1.0f;
+			shape[1].angle += 1.0f;
+
+		}
+		if (shape_check == 2 || shape_check == 3) {
+			shape[2].angle += 1.0f;
+			shape[3].angle += 1.0f;
+		}
+		break;
+	case 'R':
+		if (shape_check == 1 || shape_check == 3) {
+			shape[0].angle -= 1.0f;
+			shape[1].angle -= 1.0f;
+
+		}
+		if (shape_check == 2 || shape_check == 3) {
+			shape[2].angle -= 1.0f;
+			shape[3].angle -= 1.0f;
+		}
+		break;
+	case 'a':
+		if (shape_check == 1 || shape_check == 3) {
+			shape[0].s.x += 1.0f, shape[0].s.y += 1.0f, shape[0].s.z += 1.0f;
+			shape[1].s.x += 1.0f, shape[1].s.y += 1.0f, shape[1].s.z += 1.0f;
+
+		}
+		if (shape_check == 2 || shape_check == 3) {
+			shape[2].s.x += 1.0f, shape[2].s.y += 1.0f, shape[2].s.z += 1.0f;
+			shape[3].s.x += 1.0f, shape[3].s.y += 1.0f, shape[3].s.z += 1.0f;
+		}
+		break;
+	case 'A':
+		if (shape_check == 1 || shape_check == 3) {
+			shape[0].s.x -= 1.0f, shape[0].s.y -= 1.0f, shape[0].s.z -= 1.0f;
+			shape[1].s.x -= 1.0f, shape[1].s.y -= 1.0f, shape[1].s.z -= 1.0f;
+
+		}
+		if (shape_check == 2 || shape_check == 3) {
+			shape[2].s.x -= 1.0f, shape[2].s.y -= 1.0f, shape[2].s.z -= 1.0f;
+			shape[3].s.x -= 1.0f, shape[3].s.y -= 1.0f, shape[3].s.z -= 1.0f;
+		}
+		break;
+	case 'b':
+		if (shape_check == 1 || shape_check == 3) {
+			shape[0].ws.x += 1.0f, shape[0].ws.y += 1.0f, shape[0].ws.z += 1.0f;
+			shape[1].ws.x += 1.0f, shape[1].ws.y += 1.0f, shape[1].ws.z += 1.0f;
+
+		}
+		if (shape_check == 2 || shape_check == 3) {
+			shape[2].ws.x += 1.0f, shape[2].ws.y += 1.0f, shape[2].ws.z += 1.0f;
+			shape[3].ws.x += 1.0f, shape[3].ws.y += 1.0f, shape[3].ws.z += 1.0f;
+		}
+		break;
+	case 'B':
+		if (shape_check == 1 || shape_check == 3) {
+			shape[0].ws.x -= 1.0f, shape[0].ws.y -= 1.0f, shape[0].ws.z -= 1.0f;
+			shape[1].ws.x -= 1.0f, shape[1].ws.y -= 1.0f, shape[1].ws.z -= 1.0f;
+
+		}
+		if (shape_check == 2 || shape_check == 3) {
+			shape[2].ws.x -= 1.0f, shape[2].ws.y -= 1.0f, shape[2].ws.z -= 1.0f;
+			shape[3].ws.x -= 1.0f, shape[3].ws.y -= 1.0f, shape[3].ws.z -= 1.0f;
+		}
+		break;
+	case 'd':
+		if (shape_check == 1 || shape_check == 3) {
+			shape[0].t.x -= 1.0f;
+			shape[1].t.x -= 1.0f;
+
+		}
+		if (shape_check == 2 || shape_check == 3) {
+			shape[2].t.x -= 1.0f;
+			shape[3].t.x -= 1.0f;
+		}
+		break;
+	case 'D':
+		if (shape_check == 1 || shape_check == 3) {
+			shape[0].t.x += 1.0f;
+			shape[1].t.x += 1.0f;
+
+		}
+		if (shape_check == 2 || shape_check == 3) {
+			shape[2].t.x += 1.0f;
+			shape[3].t.x += 1.0f;
+		}
+		break;
+	case 'v':
+		v = !v;
+		break;
+	case 't':
+		if (!t) {
+			b = false;
+			t = true;
+			v1 = shape[0].t;
+			v2 = shape[1].t;
+			v3 = shape[2].t;
+			v4 = shape[3].t;
+			vt = 0.0f;
+		}
+		break;
+	case 'u':
+		if (!u) {
+			b = false;
+			u = true;
+			v1 = shape[0].t;
+			v2 = shape[1].t;
+			v3 = shape[2].t;
+			v4 = shape[3].t;
+			vt = 0.0f;
+		}
+		break;
+	case 's':
+		InitData();
+		c = false;
+		v = false;
+		t = false;
+		u = false;
+		shape_check = 0;
+		vt = 0.0f;
+		break;
+
 	}
+
+
 
 	glutPostRedisplay();
 }
@@ -583,8 +776,91 @@ void TimerFunction(int value)
 {
 
 	for (size_t i = 0; i < shape.size(); ++i) {
+
+		if (v) {
+			shape[i].angle += 1.0f;
+			shape[i].r.x += 0.1f;
+			if (i < 2) {
+				shape[i].s.x -= 0.001f, shape[i].s.y -= 0.001f, shape[i].s.z -= 0.001f;
+			}
+			else {
+				shape[i].s.x += 0.001f, shape[i].s.y += 0.001f, shape[i].s.z += 0.001f;
+			}
+		}
+		if (t) {
+			if (!b) {
+				for (int i = 0;i < 4;++i) {
+					shape[i].t = shape[i].t - shape[i].t * vt;
+				}
 		
-	
+				vt += 0.001f;
+				if (vt >= 1.0f) {
+					b = true;
+					vt = 0.0f;
+				}
+			}
+			else {
+		
+				shape[0].t = shape[0].t - glm::vec3(shape[0].t.x * vt, shape[0].t.y * vt, shape[0].t.z * vt)+ vt*v3;
+				shape[1].t = shape[1].t - glm::vec3(shape[1].t.x * vt, shape[1].t.y * vt, shape[1].t.z * vt)+ vt*v4;
+				shape[2].t = shape[2].t - glm::vec3(shape[2].t.x * vt, shape[2].t.y * vt, shape[2].t.z * vt)+ vt*v1;
+				shape[3].t = shape[3].t - glm::vec3(shape[3].t.x * vt, shape[3].t.y * vt, shape[3].t.z * vt)+ vt*v2;
+				vt += 0.001f;
+				if (vt >= 1.0f) {
+					vt = 0.0f;
+					t = false;
+				}
+
+			}
+		}
+		if (u) {
+			if (!b) {
+				for (int i = 0;i < 2;++i) {
+					shape[i].t = shape[i].t - shape[i].t*vt + glm::vec3(shape[i].t.x * vt, 2.0f * vt, shape[i].t.z * vt);
+				}
+				for (int i = 2;i < 4;++i) {
+					shape[i].t = shape[i].t - shape[i].t * vt + glm::vec3(shape[i].t.x * vt, -2.0f * vt, shape[i].t.z * vt);
+				}
+				vt += 0.001f;
+				if (vt >= 1.0f) {
+					b = true;
+					vt = 0.0f;
+				}
+			}
+			else {
+
+				shape[0].t = shape[0].t - glm::vec3(shape[0].t.x * vt, shape[0].t.y * vt, shape[0].t.z * vt) + vt * v3;
+				shape[1].t = shape[1].t - glm::vec3(shape[1].t.x * vt, shape[1].t.y * vt, shape[1].t.z * vt) + vt * v4;
+				shape[2].t = shape[2].t - glm::vec3(shape[2].t.x * vt, shape[2].t.y * vt, shape[2].t.z * vt) + vt * v1;
+				shape[3].t = shape[3].t - glm::vec3(shape[3].t.x * vt, shape[3].t.y * vt, shape[3].t.z * vt) + vt * v2;
+				cout << shape[0].t.x << endl;
+				vt += 0.001f;
+				if (vt >= 1.0f) {
+					vt = 0.0f;
+					t = false;
+				}
+
+			}
+		}
+
+		glm::mat4 m = glm::mat4(1.0f);
+
+		m = glm::translate(m, shape[i].t);
+		m = glm::rotate(m, glm::radians(shape[i].r.x), glm::vec3(1.0f, 0.0f, 0.0f));
+		m = glm::rotate(m, glm::radians(shape[i].r.y), glm::vec3(0.0f, 1.0f, 0.0f));
+		m = glm::rotate(m, glm::radians(shape[i].r.z), glm::vec3(0.0f, 0.0f, 1.0f));
+		m = glm::translate(m, -shape[i].t);		 
+
+		m = glm::rotate(m, glm::radians(shape[i].angle), glm::vec3(0.0f, 1.0f, 0.0f));
+		m = glm::translate(m, shape[i].t);
+		m = glm::scale(m, shape[i].s);
+
+
+		m = glm::translate(m, shape[i].t);
+		m = glm::scale(m, shape[i].ws);
+		m = glm::translate(m, -shape[i].t);
+
+		shape[i].modelMat = m;
 	}
 
 

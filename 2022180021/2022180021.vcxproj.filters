@@ -38,6 +38,9 @@
     <ClCompile Include="2-18.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="컴그 숙제 진짜 모르겠으면 참고하기.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dtd.h">
