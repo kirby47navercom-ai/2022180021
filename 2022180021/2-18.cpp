@@ -307,102 +307,21 @@ int main(int argc, char** argv) {
 	model.push_back(read_obj_file("cube.obj"));
 	model.push_back(read_obj_file("pyramid.obj"));
 	model.push_back(read_obj_file("sphere.obj"));
-	
-	glm::vec3 v1 = { -0.5,-0.5,-0.5 };
-	glm::vec3 v2 = { -0.5,-0.5,0.5 };
-	glm::vec3 v3 = { -0.5,0.5,-0.5 };
-	glm::vec3 v4 = { -0.5,0.5,0.5 };
-	glm::vec3 v5 = { 0.5,-0.5,-0.5 };
-	glm::vec3 v6 = { 0.5,-0.5,0.5 };
-	glm::vec3 v7 = { 0.5,0.5,-0.5 };
-	glm::vec3 v8 = { 0.5,0.5,0.5 };
-
-	vector<glm::vec3> vertices;
-
-	//정육면체 모델
-
-	//앞면
-	vertices.push_back(v2); vertices.push_back(v6); vertices.push_back(v8);
-	vertices.push_back(v2); vertices.push_back(v8); vertices.push_back(v4);
-	model.push_back({ vertices });
-
-	vertices.clear();
-
-	//왼쪽면
-	vertices.push_back(v1); vertices.push_back(v4); vertices.push_back(v3);
-	vertices.push_back(v1); vertices.push_back(v2); vertices.push_back(v4);
-	model.push_back({ vertices });
-
-	vertices.clear();
-
-	//오른쪽면
-	vertices.push_back(v5); vertices.push_back(v7); vertices.push_back(v8);
-	vertices.push_back(v5); vertices.push_back(v8); vertices.push_back(v6);
-	model.push_back({ vertices });
-
-	vertices.clear();
-
-	//뒷면
-	vertices.push_back(v1); vertices.push_back(v7); vertices.push_back(v5);
-	vertices.push_back(v1); vertices.push_back(v3); vertices.push_back(v7);
-	model.push_back({ vertices });
-
-	vertices.clear();
-
-
-	//아래면
-	vertices.push_back(v1); vertices.push_back(v5); vertices.push_back(v6);
-	vertices.push_back(v1); vertices.push_back(v6); vertices.push_back(v2);
-	model.push_back({ vertices });
-
-	vertices.clear();
-
-	//윗면
-	vertices.push_back(v3); vertices.push_back(v8); vertices.push_back(v7);
-	vertices.push_back(v3); vertices.push_back(v4); vertices.push_back(v8);
-	model.push_back({ vertices });
-
-	vertices.clear();
-
-
-	//피라미드 모델
-	v1 = { -0.5,-0.2,-0.5 };
-	v2 = { 0.5,-0.2,-0.5 };
-	v3 = { 0.5,-0.2,0.5 };
-	v4 = { -0.5,-0.2,0.5 };
-	v5 = { 0,0.8,0 };
-
-	//앞면
-	vertices.push_back(v5); vertices.push_back(v4); vertices.push_back(v3);
-	model.push_back({ vertices });
-
-	vertices.clear();
-
-	//왼쪽면
-	vertices.push_back(v5); vertices.push_back(v1); vertices.push_back(v4);
-	model.push_back({ vertices });
-
-	vertices.clear();
-
-	//오른쪽면
-	vertices.push_back(v5); vertices.push_back(v3); vertices.push_back(v2);
-	model.push_back({ vertices });
-
-	vertices.clear();
-	//뒷면
-	vertices.push_back(v5); vertices.push_back(v2); vertices.push_back(v1);
-	model.push_back({ vertices });
-
-	vertices.clear();
+	model.push_back(read_obj_file("cube - front.obj"));
+	model.push_back(read_obj_file("cube - left.obj"));
+	model.push_back(read_obj_file("cube - right.obj"));
+	model.push_back(read_obj_file("cube - back.obj"));
+	model.push_back(read_obj_file("cube - bottom.obj"));
+	model.push_back(read_obj_file("cube - top.obj"));
+	model.push_back(read_obj_file("pyramid - front.obj"));
+	model.push_back(read_obj_file("pyramid - left.obj"));
+	model.push_back(read_obj_file("pyramid - right.obj"));
+	model.push_back(read_obj_file("pyramid - back.obj"));
+	model.push_back(read_obj_file("pyramid - bottom.obj"));
 
 
 
-	//아래면
-	vertices.push_back(v3); vertices.push_back(v1); vertices.push_back(v4);
-	vertices.push_back(v3); vertices.push_back(v2); vertices.push_back(v1);
-	model.push_back({ vertices });
 
-	vertices.clear();
 
 	InitBuffers();
 	InitData();
@@ -554,8 +473,7 @@ void DrawScene() {
 
 	//--------------------------------------------------------------------------
 	// Camera (View) 및 Projection 매트릭스 설정
-	glm::vec3 camera_ = cameraPos + camera_move;
-	glm::mat4 view = glm::lookAt(camera_, cameraTarget, glm::vec3(0.0f, 1.0f, 0.0f)); // 뷰 매트릭스
+	glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, glm::vec3(0.0f, 1.0f, 0.0f)); // 뷰 매트릭스
 	glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f); // 프로젝션 매트릭스
 
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
@@ -610,7 +528,18 @@ void Reshape(int w, int h) {
 }
 
 void Mouse(int button, int state, int x, int y) {
-
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN ) {
+		
+	}
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+		
+	}
+	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
+		
+	}
+	if (button == GLUT_RIGHT_BUTTON && state == GLUT_UP ) {
+		
+	}
 }
 
 void Keyboard(unsigned char key, int x, int y)
